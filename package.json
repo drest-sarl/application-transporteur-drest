@@ -3,13 +3,20 @@
   "version": "1.0.0",
   "private": true,
   "description": "Drest — mise à jour automatique des statuts de commande du back-office à partir des transporteurs (Big Boss, AFEX, Aramex, Drest Delivery).",
-  "scripts": { "dev": "next dev", "build": "next build", "start": "next start" },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
   "dependencies": {
+    "@vercel/functions": "^2.2.13",
     "next": "14.2.35",
+    "pg": "8.13.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "pg": "8.13.1",
     "xlsx": "0.18.5"
   },
-  "engines": { "node": ">=18.18" }
+  "engines": {
+    "node": ">=18.18"
+  }
 }
