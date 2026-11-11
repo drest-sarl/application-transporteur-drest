@@ -92,10 +92,11 @@ export default async function Tableau({ searchParams }) {
 
       <div className="carte">
         <h2>File d'attente ({d.nFile.a} en attente, {d.nFile.s} simulés)</h2>
+        <p className="doux">« Appliquer cette commande » change tout de suite cette seule commande dans le BO (même en simulation) : pratique pour tester.</p>
         <table><thead><tr><th>Commande</th><th>Statut BO</th><th>→ Nouveau</th><th>Selon</th><th>Ajouté</th><th></th></tr></thead>
           <tbody>{d.file.map((f) => <tr key={f.id}><td>{f.commande}</td><td>{lib(f.attendu)}</td><td><b>{lib(f.cible)}</b>{f.preciser && <span className="doux"> (correction)</span>}</td>
             <td>{f.transporteur} {f.colis} <span className="doux">{f.statut_transporteur}</span></td><td>{quand(f.cree_le)}</td>
-            <td><Action action="retirer" id={f.id}>Retirer</Action></td></tr>)}</tbody></table>
+            <td><Action action="tester" id={f.id}>Appliquer cette commande</Action> <Action action="retirer" id={f.id}>Retirer</Action></td></tr>)}</tbody></table>
       </div>
 
       <div className="carte">
