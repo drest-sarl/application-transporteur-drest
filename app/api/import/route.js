@@ -18,6 +18,13 @@ export async function POST(req) {
     }
     const commandes_bo = await majCommandesBO(Date.now() + 15_000).catch((e) => 'erreur : ' + e.message);
     const decisions = await evaluer(Date.now() + 25_000, 3000);
-    return NextResponse.json({ fichiers: res, commandes_bo, decisions });
-  } catch (e) { return NextResponse.json({ erreur: e.message }, { status: 400 }); }
+    const resume = res.map((r) => r.erreur ? `${r.fichier} : ERREUR ${r.erreur}` : `${r.type} : ${r.colis} colis lus (${r.nouveaux_ou_changes} nouveaux ou changés)`).join(' · ')
+      + ` — commandes évaluées : ${decisions.evaluees}, ajoutées à la file : ${decisions.enFile}, alertes : ${decisions.alertes}`
+      + (decisions.evaluees >= 3000 ? ' — il en reste : cliquez « Synchroniser maintenant » pour continuer' : '');
+    return retour(req, resume);
+  } catch (e) { return retour(req, 'Import : erreur ' + e.message); }
+}
+
+function retour(req, message) {
+  return NextResponse.redirect(new URL('/?msg=' + encodeURIComponent(message.slice(0, 600)), req.url), 303);
 }
