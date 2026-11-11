@@ -17,7 +17,7 @@ puis suit chaque colis seule jusqu'à « livré » ou « retour ».
 ## Mise en ligne (≈ 30 min)
 
 ### 1. Code sur GitHub
-Le code est dans le dépôt privé `DRESTTUN/drest-synchro-statuts` (branche `main`). Chaque modification poussée sur `main` est redéployée automatiquement par Vercel.
+Le code est dans le dépôt privé `drest-sarl/application-transporteur-drest` (branche `main`). Chaque modification poussée sur `main` est redéployée automatiquement par Vercel.
 
 ### 2. Créer le projet Vercel
 1. vercel.com → **Add New… → Project** → importer `drest-synchro-statuts` → **Deploy** (le 1er déploiement peut afficher une erreur : normal, les variables manquent).
