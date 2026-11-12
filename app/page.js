@@ -53,6 +53,10 @@ export default async function Tableau({ searchParams }) {
           {d.pause === 'oui' ? <Action action="pause" valeur="non">Reprendre</Action> : <Action action="pause" valeur="oui" cls="danger">Pause</Action>}
         </div>
       </div>
+      <form method="get" action="/commande" className="carte actions">
+        <input name="n" placeholder="Rechercher une commande : DR-261110-92555" style={{ flex: 1, minWidth: 220, padding: 8, border: '1px solid var(--bord)', borderRadius: 8 }} />
+        <button type="submit">Rechercher</button>
+      </form>
       {msg && <div className="msg">{msg}</div>}
 
       <div className="grille">
@@ -94,7 +98,7 @@ export default async function Tableau({ searchParams }) {
         <h2>File d'attente ({d.nFile.a} en attente, {d.nFile.s} simulés)</h2>
         <p className="doux">« Appliquer cette commande » change tout de suite cette seule commande dans le BO (même en simulation) : pratique pour tester.</p>
         <table><thead><tr><th>Commande</th><th>Statut BO</th><th>→ Nouveau</th><th>Selon</th><th>Ajouté</th><th></th></tr></thead>
-          <tbody>{d.file.map((f) => <tr key={f.id}><td>{f.commande}</td><td>{lib(f.attendu)}</td><td><b>{lib(f.cible)}</b>{f.preciser && <span className="doux"> (correction)</span>}</td>
+          <tbody>{d.file.map((f) => <tr key={f.id}><td><a href={`/commande?n=${f.commande}`}>{f.commande}</a></td><td>{lib(f.attendu)}</td><td><b>{lib(f.cible)}</b>{f.preciser && <span className="doux"> (correction)</span>}</td>
             <td>{f.transporteur} {f.colis} <span className="doux">{f.statut_transporteur}</span></td><td>{quand(f.cree_le)}</td>
             <td><Action action="tester" id={f.id}>Appliquer cette commande</Action> <Action action="retirer" id={f.id}>Retirer</Action></td></tr>)}</tbody></table>
       </div>
@@ -102,13 +106,13 @@ export default async function Tableau({ searchParams }) {
       <div className="carte">
         <div className="entete" style={{ marginBottom: 8 }}><h2>Alertes ({d.nAlertes})</h2>{d.nAlertes > 0 && <Action action="alertes_toutes_vues">Tout marquer vu</Action>}</div>
         <table><thead><tr><th>Date</th><th>Commande</th><th>Type</th><th>Détail</th><th></th></tr></thead>
-          <tbody>{d.alertes.map((a) => <tr key={a.id}><td>{quand(a.date)}</td><td>{a.commande}</td><td>{a.type}</td><td>{a.detail}</td><td><Action action="alerte_vue" id={a.id}>Vu</Action></td></tr>)}</tbody></table>
+          <tbody>{d.alertes.map((a) => <tr key={a.id}><td>{quand(a.date)}</td><td>{a.commande && a.commande !== '—' ? <a href={`/commande?n=${a.commande}`}>{a.commande}</a> : a.commande}</td><td>{a.type}</td><td>{a.detail}</td><td><Action action="alerte_vue" id={a.id}>Vu</Action></td></tr>)}</tbody></table>
       </div>
 
       <div className="carte">
         <h2>Journal (100 derniers)</h2>
         <table><thead><tr><th>Date</th><th>Mode</th><th>Commande</th><th>Avant → Après</th><th>Selon</th><th>Résultat</th><th></th></tr></thead>
-          <tbody>{d.journal.map((j) => <tr key={j.id}><td>{quand(j.date)}</td><td>{j.mode === 'reel' ? 'réel' : <span className="doux">simulation</span>}</td><td>{j.commande}</td>
+          <tbody>{d.journal.map((j) => <tr key={j.id}><td>{quand(j.date)}</td><td>{j.mode === 'reel' ? 'réel' : <span className="doux">simulation</span>}</td><td><a href={`/commande?n=${j.commande}`}>{j.commande}</a></td>
             <td>{lib(j.avant)} → <b>{lib(j.apres)}</b></td><td>{j.transporteur} {j.colis}</td>
             <td className={j.ok ? 'ok' : 'ko'}>{j.ok ? '✓' : '✗'} <span className="doux">{j.resultat}</span></td>
             <td>{j.mode === 'reel' && j.ok && !j.annule && <Action action="annuler" id={j.id}>Annuler</Action>}{j.annule && <span className="doux">annulé</span>}</td></tr>)}</tbody></table>

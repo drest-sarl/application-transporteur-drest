@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fixer, q } from '../../../lib/db';
-import { changerMode, annulerJournal, collecte, envoi, appliquerUn } from '../../../lib/moteur';
+import { changerMode, annulerJournal, collecte, envoi, appliquerUn, verifierCommande } from '../../../lib/moteur';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 // Actions de l'écran (protégées par le mot de passe via middleware.js)
@@ -16,9 +16,12 @@ export async function POST(req) {
     else if (action === 'alertes_toutes_vues') await q('UPDATE alertes SET vue = true WHERE NOT vue');
     else if (action === 'retirer') await q("UPDATE file SET etat = 'retire', traite_le = now() WHERE id = $1 AND etat IN ('attente','simule')", [Number(f.get('id'))]);
     else if (action === 'tester') message = await appliquerUn(Number(f.get('id')));
+    else if (action === 'verifier') message = await verifierCommande(String(f.get('n') || '').trim().toUpperCase());
     else if (action === 'collecte') message = JSON.stringify(await collecte());
     else if (action === 'envoi') message = JSON.stringify(await envoi());
     else message = 'action inconnue';
   } catch (e) { message = 'erreur : ' + e.message; }
-  return NextResponse.redirect(new URL('/?msg=' + encodeURIComponent(message.slice(0, 400)), req.url), 303);
+  const retour = String(f.get('retour') || f.get('n') || '').trim().toUpperCase(); // actions lancées depuis la fiche d'une commande
+  const page = retour ? `/commande?n=${encodeURIComponent(retour)}&` : '/?';
+  return NextResponse.redirect(new URL(page + 'msg=' + encodeURIComponent(message.slice(0, 400)), req.url), 303);
 }
