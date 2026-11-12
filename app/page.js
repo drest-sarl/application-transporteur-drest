@@ -23,7 +23,7 @@ export default async function Tableau({ searchParams }) {
     const [mode, pause] = [await reglage('mode', 'simulation'), await reglage('pause', 'non')];
     d = {
       mode, pause,
-      file: await q("SELECT * FROM file WHERE etat IN ('attente','simule') ORDER BY (cible = 'Livraison-en-cours'), id LIMIT 100"),
+      file: await q("SELECT * FROM file WHERE etat IN ('attente','simule') ORDER BY (cible <> 'Livraison-en-cours'), id LIMIT 100"),
       sortis: await q1("SELECT count(*) FILTER (WHERE etat = 'fait') fait, count(*) FILTER (WHERE etat = 'deja') deja, count(*) FILTER (WHERE etat IN ('ignore','annulee')) ignore, count(*) FILTER (WHERE etat IN ('refuse','erreur')) echec FROM file WHERE traite_le > now() - interval '1 hour'"),
       nFile: (await q1("SELECT count(*) FILTER (WHERE etat='attente') a, count(*) FILTER (WHERE etat='simule') s FROM file")),
       heure: Number((await q1("SELECT count(*) n FROM journal WHERE mode='reel' AND ok AND date > now() - interval '1 hour'")).n),
@@ -80,7 +80,7 @@ export default async function Tableau({ searchParams }) {
               <td>{c.suivis || 0}</td><td>{c.total || 0}</td><td>{quand(c.maj)}</td></tr>;
           })}</tbody></table>
         <p className="doux">Derniers passages : {d.passages.map((p) => `${p.type} ${quand(p.date)}`).join(' · ') || 'aucun'} — commandes à évaluer : <b>{d.aEvaluer}</b></p>
-        <p className="doux">Sortis de la file dans l'heure : <b>{d.sortis.fait}</b> changés · {d.sortis.deja} déjà au bon statut · {d.sortis.ignore} ignorés (statut avancé ou annulée) · {d.sortis.echec} refusés / erreurs. Ordre d'envoi : Livrée et Retour d'abord, puis Livraison en cours.</p>
+        <p className="doux">Sortis de la file dans l'heure : <b>{d.sortis.fait}</b> changés · {d.sortis.deja} déjà au bon statut · {d.sortis.ignore} ignorés (statut avancé ou annulée) · {d.sortis.echec} refusés / erreurs. Ordre d'envoi : d'abord les commandes qui passent en Livraison en cours (non traitées, validées…), puis Livrée et Retour.</p>
         <div className="actions">
           <Action action="collecte">Synchroniser maintenant</Action>
           <Action action="envoi">Envoyer la file maintenant</Action>
