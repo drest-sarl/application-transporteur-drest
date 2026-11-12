@@ -103,7 +103,7 @@ export default async function Tableau({ searchParams }) {
 
       <div className="carte">
         <h2>Déposer des exports transporteurs</h2>
-        <p className="doux">Rapport Aramex (TotalShipmentReport), export AFEX (Colis_transport), export Big Boss (colis_export) ou Drest Delivery (.csv) :
+        <p className="doux">Rapport ou envoi en masse Aramex, export AFEX (Colis_transport), export Big Boss (colis_export) ou Drest Delivery (.csv) :
           l'application apprend les codes des colis, puis les suit seule toutes les 30 min.</p>
         <form method="post" action="/api/import" encType="multipart/form-data" className="actions">
           <input type="file" name="fichiers" multiple accept=".xlsx,.xls,.csv" style={{ maxWidth: 420, margin: 0 }} />

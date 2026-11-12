@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { lireExport } from '../../../lib/imports';
 import { enregistrerColis, evaluer, majCommandesBO } from '../../../lib/moteur';
-import { passage } from '../../../lib/db';
+import { passage, q } from '../../../lib/db';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 // Dépôt d'un export transporteur : apprend les codes de colis (et leur statut), puis décide pour les commandes concernées.
@@ -13,7 +13,17 @@ export async function POST(req) {
       if (!f || typeof f === 'string') continue;
       try {
         const { type, colis } = lireExport(Buffer.from(await f.arrayBuffer()), f.name);
-        const r = await enregistrerColis(colis, `export ${type}`);
+        // colis sans statut (envoi en masse) : seulement s'ils sont nouveaux — un colis déjà suivi garde son vrai statut ;
+        // ils sont relus chez le transporteur dès la prochaine collecte
+        let liste = colis;
+        const sansStatut = colis.filter((c) => c.nouveauSeulement);
+        if (sansStatut.length) {
+          const connus = new Set((await q('SELECT transporteur, code, commande FROM colis WHERE code = ANY($1::text[])', [[...new Set(sansStatut.map((c) => c.code))]]))
+            .map((x) => `${x.transporteur}|${x.code}|${x.commande}`));
+          liste = colis.filter((c) => !c.nouveauSeulement || !connus.has(`${c.transporteur}|${c.code}|${c.commande}`));
+        }
+        const r = await enregistrerColis(liste, `export ${type}`);
+        if (sansStatut.length) await q("UPDATE colis SET suivi_le = NULL WHERE source = $1 AND code = ANY($2::text[]) AND statut_brut LIKE 'Colis créé%'", [`export ${type}`, sansStatut.map((c) => c.code)]);
         res.push({ fichier: f.name, type, colis: colis.length, nouveaux_ou_changes: r.changes });
       } catch (e) { res.push({ fichier: f.name, erreur: e.message }); }
     }
