@@ -62,6 +62,7 @@ export default async function Tableau({ searchParams }) {
       <form method="get" action="/commande" className="carte actions">
         <input name="n" placeholder="Rechercher une commande : DR-261110-92555" style={{ flex: 1, minWidth: 220, padding: 8, border: '1px solid var(--bord)', borderRadius: 8 }} />
         <button type="submit">Rechercher</button>
+        <a href="/recherche">Recherche filtrée (société, origine, date, statuts) →</a>
       </form>
       {msg && <div className="msg">{msg}</div>}
       {rattrapage && (
