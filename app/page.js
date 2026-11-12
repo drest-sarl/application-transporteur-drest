@@ -33,6 +33,7 @@ export default async function Tableau({ searchParams }) {
       colis: await q('SELECT transporteur, count(*) FILTER (WHERE NOT fini) suivis, count(*) total, max(maj_le) maj FROM colis GROUP BY transporteur ORDER BY transporteur'),
       passages: await q("SELECT DISTINCT ON (type) type, date, resume FROM passages ORDER BY type, date DESC"),
       bo: await q1('SELECT count(*) n, max(lu_le) lu FROM commandes_bo'),
+      aEvaluer: Number((await q1('SELECT count(*) n FROM a_evaluer')).n),
     };
   } catch (e) { erreur = e.message; }
   const msg = searchParams?.msg;
@@ -77,7 +78,7 @@ export default async function Tableau({ searchParams }) {
             return <tr key={t}><td>{t}</td><td>{actif == null ? <span className="doux">export seulement</span> : actif ? <span className="ok">configuré</span> : <span className="ko">accès manquants</span>}</td>
               <td>{c.suivis || 0}</td><td>{c.total || 0}</td><td>{quand(c.maj)}</td></tr>;
           })}</tbody></table>
-        <p className="doux">Derniers passages : {d.passages.map((p) => `${p.type} ${quand(p.date)}`).join(' · ') || 'aucun'}</p>
+        <p className="doux">Derniers passages : {d.passages.map((p) => `${p.type} ${quand(p.date)}`).join(' · ') || 'aucun'} — commandes à évaluer : <b>{d.aEvaluer}</b></p>
         <div className="actions">
           <Action action="collecte">Synchroniser maintenant</Action>
           <Action action="envoi">Envoyer la file maintenant</Action>
