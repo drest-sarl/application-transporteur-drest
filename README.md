@@ -37,6 +37,7 @@ Le code est dans le dépôt privé `drest-sarl/application-transporteur-drest` (
 | `ARAMEX_USERNAME` / `ARAMEX_PASSWORD` / `ARAMEX_ACCOUNT_PIN` | accès API Aramex |
 | `ARAMEX_ACCOUNT_NUMBER` | `72655188` |
 | `ARAMEX_ACCOUNT_ENTITY` / `ARAMEX_COUNTRY_CODE` | `TUN` / `TN` |
+| `DD_SUPABASE_URL` / `DD_SUPABASE_KEY` | Drest Delivery : adresse du projet Supabase / clé (seuls des GET sur `colis` sont faits) |
 
 Puis **Deployments → … → Redeploy**. Ouvrir `https://<projet>.vercel.app` → mot de passe → l'écran s'affiche en **SIMULATION**.
 

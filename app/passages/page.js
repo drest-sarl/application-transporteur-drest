@@ -15,7 +15,7 @@ function resume(type, r) {
   if (o.deja_en_cours) return 'ignoré : une collecte tournait déjà';
   if (type === 'collecte') {
     const t = o.transporteurs || {}; const d = o.decisions || {};
-    return `${o.commandes_bo ?? 0} commandes BO lues · colis BO : ${o.colis_bo?.colis_nouveaux ?? 0} nouveaux · relus : ${Object.entries(t).map(([k, v]) => `${k} ${v}`).join(', ')} · ${d.evaluees ?? 0} évaluées, ${d.enFile ?? 0} mises en file, ${d.alertes ?? 0} alertes`;
+    return `${o.commandes_bo ?? 0} commandes BO lues · colis BO : ${o.colis_bo?.colis_nouveaux ?? 0} nouveaux · Drest Delivery : ${typeof o.drest_delivery === 'object' ? `${o.drest_delivery.colis} colis lus, ${o.drest_delivery.changes} changés` : (o.drest_delivery ?? '—')} · relus : ${Object.entries(t).map(([k, v]) => `${k} ${v}`).join(', ')} · ${d.evaluees ?? 0} évaluées, ${d.enFile ?? 0} mises en file, ${d.alertes ?? 0} alertes`;
   }
   if (type === 'evaluer') return `${o.evaluees ?? 0} évaluées, ${o.enFile ?? 0} mises en file, ${o.alertes ?? 0} alertes, reste ${o.reste ?? 0}`;
   if (type === 'envoi') return o.pause ? 'en pause' : o.mode === 'simulation' ? `simulation : ${o.simules} notés` : `${o.faits ?? 0} changés, ${o.deja ?? 0} déjà bons, ${o.ignores ?? 0} ignorés, ${(o.refuses ?? 0) + (o.erreurs ?? 0)} refusés/erreurs`;
