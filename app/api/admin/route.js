@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fixer, q } from '../../../lib/db';
-import { changerMode, annulerJournal, collecte, envoi, appliquerUn, verifierCommande } from '../../../lib/moteur';
+import { changerMode, annulerJournal, collecte, envoi, appliquerUn, verifierCommande, lancerRattrapage, arreterRattrapage } from '../../../lib/moteur';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 // Actions de l'écran (protégées par le mot de passe via middleware.js)
@@ -17,6 +17,8 @@ export async function POST(req) {
     else if (action === 'retirer') await q("UPDATE file SET etat = 'retire', traite_le = now() WHERE id = $1 AND etat IN ('attente','simule')", [Number(f.get('id'))]);
     else if (action === 'tester') message = await appliquerUn(Number(f.get('id')));
     else if (action === 'verifier') message = await verifierCommande(String(f.get('n') || '').trim().toUpperCase());
+    else if (action === 'rattrapage') message = await lancerRattrapage(Math.min(120, Math.max(10, Number(f.get('valeur')) || 30)));
+    else if (action === 'rattrapage_stop') message = await arreterRattrapage();
     else if (action === 'collecte') message = JSON.stringify(await collecte());
     else if (action === 'envoi') message = JSON.stringify(await envoi());
     else message = 'action inconnue';

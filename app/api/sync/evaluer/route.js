@@ -1,12 +1,16 @@
 import { NextResponse } from 'next/server';
 import { waitUntil } from '@vercel/functions';
 import { appelCronAutorise } from '../../../../lib/session';
-import { evaluer } from '../../../../lib/moteur';
+import { evaluer, collecte, rattrapageActif } from '../../../../lib/moteur';
 import { passage } from '../../../../lib/db';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 // Appelée chaque minute par cron-job.org : décide pour les commandes dont un colis a changé et remplit la file. Ne modifie rien dans le BO.
-async function evaluerTout() { const r = await evaluer(Date.now() + 50_000, 5000); await passage('evaluer', r); return r; }
+async function evaluerTout() {
+  // pendant un rattrapage : collecte complète chaque minute (elle décide aussi) ; si une collecte tourne déjà, simple décision
+  if (await rattrapageActif()) { const c = await collecte(); if (!c.deja_en_cours) return c; }
+  const r = await evaluer(Date.now() + 50_000, 5000); await passage('evaluer', r); return r;
+}
 async function go(req) {
   if (!appelCronAutorise(req)) return NextResponse.json({ erreur: 'clé absente ou fausse' }, { status: 401 });
   // par défaut : réponse immédiate (cron-job.org n'attend que 30 s), le travail continue en arrière-plan jusqu'au bout (≤ 60 s).

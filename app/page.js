@@ -35,11 +35,15 @@ export default async function Tableau({ searchParams }) {
       passages: await q("SELECT DISTINCT ON (type) type, date, resume FROM passages ORDER BY type, date DESC"),
       bo: await q1('SELECT count(*) n, max(lu_le) lu FROM commandes_bo'),
       aEvaluer: Number((await q1('SELECT count(*) n FROM a_evaluer')).n),
+      rattrapage: await reglage('rattrapage_jusqua', ''),
+      aRelire: Number((await q1('SELECT count(*) n FROM colis WHERE NOT fini AND suivi_le IS NULL')).n),
     };
   } catch (e) { erreur = e.message; }
   const msg = searchParams?.msg;
   if (erreur) return <main><div className="carte"><h1>Synchro statuts Drest</h1><p className="ko">Erreur : {erreur}</p></div></main>;
   const reel = d.mode === 'reel';
+  const rattrapage = d.rattrapage && new Date(d.rattrapage) > new Date() ? new Date(d.rattrapage) : null;
+  const minutesFile = Math.ceil(Number(d.nFile.a) / ((Number(process.env.LIMITE_PAR_HEURE) || 700) / 60));
   return (
     <main>
       <div className="entete">
@@ -60,6 +64,14 @@ export default async function Tableau({ searchParams }) {
         <button type="submit">Rechercher</button>
       </form>
       {msg && <div className="msg">{msg}</div>}
+      {rattrapage && (
+        <div className="msg">
+          <b>Rattrapage en cours jusqu'à {quand(rattrapage)}</b> — collecte complète chaque minute.
+          Colis à relire : <b>{d.aRelire}</b> · commandes à évaluer : <b>{d.aEvaluer}</b> · changements en file : <b>{d.nFile.a}</b>
+          {reel ? ` (≈ ${minutesFile} min d'envoi au rythme protégé)` : ' (mode simulation : rien n\'est envoyé au BO)'}.{' '}
+          <Action action="rattrapage_stop">Arrêter le rattrapage</Action>
+        </div>
+      )}
 
       <div className="grille">
         <div className="chiffre"><b>{d.nFile.a}</b><span>changements en attente</span></div>
@@ -83,6 +95,7 @@ export default async function Tableau({ searchParams }) {
         <p className="doux">Sortis de la file dans l'heure : <b>{d.sortis.fait}</b> changés · {d.sortis.deja} déjà au bon statut · {d.sortis.ignore} ignorés (statut avancé ou annulée) · {d.sortis.echec} refusés / erreurs. Ordre d'envoi : d'abord les commandes qui passent en Livraison en cours (non traitées, validées…), puis Livrée et Retour.</p>
         <div className="actions">
           <Action action="collecte">Synchroniser maintenant</Action>
+          {!rattrapage && <Action action="rattrapage" valeur="30" cls="principal">Tout synchroniser (rattrapage 30 min)</Action>}
           <Action action="envoi">Envoyer la file maintenant</Action>
         </div>
       </div>
