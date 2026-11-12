@@ -7,12 +7,13 @@ Elle ne touche jamais aux articles, adresses, prix ni frais. Au plus **700 chang
 | Quand | Quoi |
 |---|---|
 | En continu | **Big Boss** prévient l'application à chaque changement de colis (webhook signé) |
-| Toutes les 30 min (`/api/sync/collecte`) | relit la liste des commandes du BO, relit chez les transporteurs les colis pas encore livrés/retournés, décide, remplit la **file** |
+| Toutes les 10 min (`/api/sync/collecte`) | relit la liste des commandes du BO, **apprend les n° de colis créés depuis le BO**, relit chez les transporteurs les colis en cours (chacun au plus toutes les 8 min), décide, remplit la **file** |
 | Chaque minute (`/api/sync/envoi`) | applique au plus 11 changements de la file (700 / heure). En simulation : note seulement ce qui serait fait |
 | Quand vous voulez (écran) | **déposer les exports** Aramex / AFEX / Drest Delivery / Big Boss pour apprendre les codes des colis |
 
-Aramex et AFEX ne savent pas chercher un colis par n° de commande : l'application apprend leurs codes depuis les exports déposés,
-puis suit chaque colis seule jusqu'à « livré » ou « retour ».
+Colis créés depuis le BO : l'application lit leur n° toute seule (aucun export).
+Colis créés directement chez le transporteur (portail, fichier en masse, Drest Delivery) : déposer l'export ;
+ensuite l'application suit chaque colis seule jusqu'à « livré » ou « retour ».
 
 ## Mise en ligne (≈ 30 min)
 
@@ -43,7 +44,7 @@ Puis **Deployments → … → Redeploy**. Ouvrir `https://<projet>.vercel.app` 
 Créer 2 tâches (**Create cronjob**) :
 | Titre | URL | Fréquence |
 |---|---|---|
-| Drest collecte | `https://<projet>.vercel.app/api/sync/collecte?cle=<CRON_SECRET>` | toutes les 30 minutes |
+| Drest collecte | `https://<projet>.vercel.app/api/sync/collecte?cle=<CRON_SECRET>` | toutes les 10 minutes |
 | Drest envoi | `https://<projet>.vercel.app/api/sync/envoi?cle=<CRON_SECRET>` | toutes les minutes |
 Dans **Advanced** : *Request timeout* au maximum (60 s si proposé). Activer la notification par e-mail en cas d'échec.
 
