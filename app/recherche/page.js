@@ -11,7 +11,7 @@ const STATUTS = [['Untreated', 'Non traitée (Untreated)'], ['Valid', 'Validée'
   ['PrintQR', 'QR imprimé'], ['SCANNED', 'Scannée'], ['SCANNED_BY_DREST', 'Scannée Drest'],
   ['Livraison-en-cours', 'Livraison en cours'], ['Delevred', 'Livrée'], ['retour-expediteur', 'Retour expéditeur']];
 const ETATS = { attente: 'en attente', simule: 'simulé', fait: 'fait ✓', deja: 'déjà bon', ignore: 'ignoré', refuse: 'refusé', annulee: 'annulée', erreur: 'erreur', retire: 'retiré' };
-const champ = { padding: 7, border: '1px solid var(--bord)', borderRadius: 8, minWidth: 0 };
+const champ = { padding: 7, border: '1px solid var(--bord)', borderRadius: 8, width: '100%', boxSizing: 'border-box', marginTop: 4, background: 'var(--carte)' };
 
 function Choix({ name, valeur, options, tous = 'Tous' }) {
   return <select name={name} defaultValue={valeur || ''} style={champ}><option value="">{tous}</option>
@@ -28,7 +28,7 @@ export default async function Recherche({ searchParams: p = {} }) {
       <div className="entete"><div><h1>Recherche filtrée</h1><span className="doux"><a href="/">← retour au tableau de bord</a></span></div></div>
       <form method="get" action="/recherche" className="carte">
         <div className="grille" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10 }}>
-          <label>Voir<br /><Choix name="vue" valeur={vue} tous="Changements faits (journal)" options={[['file', "File d'attente"]]} /></label>
+          <label>Voir<br /><Choix name="vue" valeur={vue} tous="Journal (faits)" options={[['file', "File d'attente"]]} /></label>
           <label>N° de commande<br /><input name="n" defaultValue={p.n || ''} placeholder="DR-2611…" style={champ} /></label>
           <label>Société de livraison<br /><Choix name="transporteur" valeur={p.transporteur} options={TRANSPORTEURS_LISTE.map((t) => [t, t])} /></label>
           <label>Origine du colis<br /><Choix name="origine" valeur={p.origine} options={Object.entries(ORIGINES)} /></label>
