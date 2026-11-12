@@ -19,8 +19,8 @@ export async function POST(req) {
     else if (action === 'verifier') message = await verifierCommande(String(f.get('n') || '').trim().toUpperCase());
     else if (action === 'rattrapage') message = await lancerRattrapage(Math.min(120, Math.max(10, Number(f.get('valeur')) || 30)));
     else if (action === 'rattrapage_stop') message = await arreterRattrapage();
-    else if (action === 'collecte') message = JSON.stringify(await collecte());
-    else if (action === 'envoi') message = JSON.stringify(await envoi());
+    else if (action === 'collecte') message = JSON.stringify(await collecte('bouton'));
+    else if (action === 'envoi') message = JSON.stringify(await envoi('bouton'));
     else message = 'action inconnue';
   } catch (e) { message = 'erreur : ' + e.message; }
   const retour = String(f.get('retour') || f.get('n') || '').trim().toUpperCase(); // actions lancées depuis la fiche d'une commande

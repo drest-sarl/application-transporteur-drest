@@ -8,8 +8,9 @@ export const maxDuration = 60;
 // Appelée chaque minute par cron-job.org : décide pour les commandes dont un colis a changé et remplit la file. Ne modifie rien dans le BO.
 async function evaluerTout() {
   // pendant un rattrapage : collecte complète chaque minute (elle décide aussi) ; si une collecte tourne déjà, simple décision
-  if (await rattrapageActif()) { const c = await collecte(); if (!c.deja_en_cours) return c; }
-  const r = await evaluer(Date.now() + 50_000, 5000); await passage('evaluer', r); return r;
+  const ratt = await rattrapageActif();
+  if (ratt) { const c = await collecte('rattrapage'); if (!c.deja_en_cours) return c; }
+  const { liste, ...r } = await evaluer(Date.now() + 50_000, 5000); await passage('evaluer', r, ratt ? 'rattrapage' : 'auto', liste); return r;
 }
 async function go(req) {
   if (!appelCronAutorise(req)) return NextResponse.json({ erreur: 'clé absente ou fausse' }, { status: 401 });

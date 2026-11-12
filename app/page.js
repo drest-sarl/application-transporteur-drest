@@ -92,7 +92,7 @@ export default async function Tableau({ searchParams }) {
             return <tr key={t}><td>{t}</td><td>{actif == null ? <span className="doux">export seulement</span> : actif ? <span className="ok">configuré</span> : <span className="ko">accès manquants</span>}</td>
               <td>{c.suivis || 0}</td><td>{c.total || 0}</td><td>{quand(c.maj)}</td></tr>;
           })}</tbody></table>
-        <p className="doux">Derniers passages : {d.passages.map((p) => `${p.type} ${quand(p.date)}`).join(' · ') || 'aucun'} — commandes à évaluer : <b>{d.aEvaluer}</b></p>
+        <p className="doux">Derniers passages : {d.passages.map((p) => `${p.type} ${quand(p.date)}`).join(' · ') || 'aucun'} — commandes à évaluer : <b>{d.aEvaluer}</b> · <a href="/passages">historique des synchronisations →</a></p>
         <p className="doux">Sortis de la file dans l'heure : <b>{d.sortis.fait}</b> changés · {d.sortis.deja} déjà au bon statut · {d.sortis.ignore} ignorés (statut avancé ou annulée) · {d.sortis.echec} refusés / erreurs. Ordre d'envoi : d'abord les commandes qui passent en Livraison en cours (non traitées, validées…), puis Livrée et Retour.</p>
         <div className="actions">
           <Action action="collecte">Synchroniser maintenant</Action>
