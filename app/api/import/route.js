@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { lireExport } from '../../../lib/imports';
-import { enregistrerColis, evaluer, majCommandesBO } from '../../../lib/moteur';
+import { lireExport, lireExportBO } from '../../../lib/imports';
+import { enregistrerColis, evaluer, majCommandesBO, importerCommandesBO } from '../../../lib/moteur';
 import { passage, q } from '../../../lib/db';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -12,7 +12,10 @@ export async function POST(req) {
     for (const f of form.getAll('fichiers')) {
       if (!f || typeof f === 'string') continue;
       try {
-        const { type, colis } = lireExport(Buffer.from(await f.arrayBuffer()), f.name);
+        const tampon = Buffer.from(await f.arrayBuffer());
+        const bo = lireExportBO(tampon, f.name);
+        if (bo) { res.push({ fichier: f.name, type: bo.type, bo: await importerCommandesBO(bo.commandes) }); continue; }
+        const { type, colis } = lireExport(tampon, f.name);
         // colis sans statut (envoi en masse) : seulement s'ils sont nouveaux — un colis déjà suivi garde son vrai statut ;
         // ils sont relus chez le transporteur dès la prochaine collecte
         let liste = colis;
@@ -30,7 +33,9 @@ export async function POST(req) {
     const commandes_bo = await majCommandesBO(Date.now() + 15_000).catch((e) => 'erreur : ' + e.message);
     const { liste, ...decisions } = await evaluer(Date.now() + 25_000, 3000);
     await passage('import', { fichiers: res, decisions }, 'bouton', liste);
-    const resume = res.map((r) => r.erreur ? `${r.fichier} : ERREUR ${r.erreur}` : `${r.type} : ${r.colis} colis lus (${r.nouveaux_ou_changes} nouveaux ou changés)`).join(' · ')
+    const resume = res.map((r) => r.erreur ? `${r.fichier} : ERREUR ${r.erreur}`
+      : r.bo ? `${r.type} : ${r.bo.lues} commandes lues, ${r.bo.mises_a_jour} mises à jour${r.bo.nouvelles ? `, ${r.bo.nouvelles} ajoutées` : ''}, ${r.bo.inconnues} pas encore vues dans le BO, ${r.bo.a_reevaluer} réévaluées${r.bo.statut_non_converti ? ` (statut non reconnu pour ${r.bo.statut_non_converti} : ${r.bo.libelles_inconnus.join(', ')})` : ''}`
+      : `${r.type} : ${r.colis} colis lus (${r.nouveaux_ou_changes} nouveaux ou changés)`).join(' · ')
       + ` — commandes évaluées : ${decisions.evaluees}, ajoutées à la file : ${decisions.enFile}, alertes : ${decisions.alertes}`
       + (decisions.evaluees >= 3000 ? ' — il en reste : cliquez « Synchroniser maintenant » pour continuer' : '');
     return retour(req, resume);
